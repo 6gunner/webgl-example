@@ -1,3 +1,18 @@
+import { drawScreen } from "./draw-screen";
+import { initBuffers } from "./init-buffers";
+
+export type ProgramInfo = {
+  program: WebGLProgram;
+  attribLocations: {
+    a_Position: number;
+    a_Color: number;
+  };
+  uniformLocations: {
+    u_ProjectionMatrix: WebGLUniformLocation | null;
+    u_ModelViewMatrix: WebGLUniformLocation | null;
+  };
+}
+
 function main() {
   const canvas = document.querySelector("#canvas") as HTMLCanvasElement;
   const gl = canvas.getContext("webgl");
@@ -7,27 +22,35 @@ function main() {
     );
     return;
   }
-  // 设置清除颜色，但实际上并没有进行任何绘制操作。这就像是"准备好油漆"。
-  gl.clearColor(1.0, 0.12, 0.01, 1.0);
-  // 清除画布；gl.clear() 才是实际执行清除操作的命令，相当于用之前定义的颜色"粉刷整个画布"。
+
+
+  // Set clear color to black, fully opaque
+  gl.clearColor(0.0, 0.0, 0.0, 1.0);
+  // Clear the color buffer with specified clear color
   gl.clear(gl.COLOR_BUFFER_BIT);
-
-
 
   // 将顶点坐标 x 世界坐标转化矩阵 x 投影矩阵
   const vsSource = `
 attribute vec4 a_Position;
+attribute vec4 a_Color; // 新增颜色
 uniform mat4 u_ModelViewMatrix;
 uniform mat4 u_ProjectionMatrix;
+varying vec4 v_Color; // 用来传递颜色的varying变量
 void main() {
   gl_Position = u_ProjectionMatrix * u_ModelViewMatrix * a_Position;
+  v_Color = a_Color;
 }
   `;
 
   // 设置fragment shader, 全白色
   const fsSource = `
+
+  precision mediump float;
+  varying vec4 v_Color;      // 从顶点着色器接收颜色
+
     void main() {
-      gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+    // gl_FragColor = vec4(0.0, 0.0, 1.0, 0.5); // 半透明蓝色
+    gl_FragColor = v_Color; // 使用varying变量
     }
   `;
 
@@ -39,20 +62,22 @@ void main() {
     return;
   }
 
-  // Collect all the info needed to use the shader program.
-  // Look up which attribute our shader program is using
-  // for aVertexPosition and look up uniform locations.
-  const programInfo = {
+  // 定义shader program 信息
+  const programInfo: ProgramInfo = {
     program: shaderProgram,
     attribLocations: {
-      vertexPosition: gl.getAttribLocation(shaderProgram, "aVertexPosition"),
+      a_Position: gl.getAttribLocation(shaderProgram, "a_Position"),
+      a_Color: gl.getAttribLocation(shaderProgram, "a_Color"),
     },
     uniformLocations: {
-      projectionMatrix: gl.getUniformLocation(shaderProgram, "uProjectionMatrix"),
-      modelViewMatrix: gl.getUniformLocation(shaderProgram, "uModelViewMatrix"),
+      u_ProjectionMatrix: gl.getUniformLocation(shaderProgram, "u_ProjectionMatrix"),
+      u_ModelViewMatrix: gl.getUniformLocation(shaderProgram, "u_ModelViewMatrix"),
     },
   };
 
+  const buffers = initBuffers(gl)
+
+  drawScreen(gl, programInfo, buffers)
 
 }
 
@@ -100,7 +125,7 @@ function initShader(gl: WebGLRenderingContext, vsSource: string, fsSource: strin
 function loadShader(gl: WebGLRenderingContext, source: string, type: number) {
   const shader = gl.createShader(type);
   if (shader === null) {
-    alert("Unable to create shader");
+    alert("Unable to create loader shader");
     return null;
   }
   gl.shaderSource(shader, source);

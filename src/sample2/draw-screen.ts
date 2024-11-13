@@ -24,9 +24,9 @@ export function drawScreen(gl: WebGLRenderingContext, programInfo: ProgramInfo, 
   const modelViewMatrix = mat4.create(); // 创建一个新的 4x4 矩阵，初始化为单位矩阵（identity matrix）
   mat4.translate(modelViewMatrix, modelViewMatrix, [-0.0, 0.0, -6.0]); // 将矩阵平移到 z 轴负方向 6 个单位
 
-  // 设置位置属性
+  // 设置位置属性和颜色属性
   setPositionAttribute(gl, programInfo, buffers);
-
+  setColorAttribute(gl, programInfo, buffers);
   gl.useProgram(programInfo.program);
 
 
@@ -52,8 +52,23 @@ function setPositionAttribute(gl: WebGLRenderingContext, programInfo: ProgramInf
   gl.vertexAttribPointer(programInfo.attribLocations.a_Position, numComponents, type, normalize, stride, offset);
   gl.enableVertexAttribArray(programInfo.attribLocations.a_Position);
 
-  // 在绘制时启用颜色属性
+}
+
+// into the vertexColor attribute.
+function setColorAttribute(gl: WebGLRenderingContext, programInfo: ProgramInfo, buffers: MyBuffers) {
+  const numComponents = 4; // 每个颜色有4个值（R,G,B,A）
+  const type = gl.FLOAT;
+  const normalize = false;
+  const stride = 0;
+  const offset = 0;
   gl.bindBuffer(gl.ARRAY_BUFFER, buffers.color);
-  gl.vertexAttribPointer(programInfo.attribLocations.a_Color, numComponents, type, normalize, stride, offset);
+  gl.vertexAttribPointer(
+    programInfo.attribLocations.a_Color,
+    numComponents,
+    type,
+    normalize,
+    stride,
+    offset,
+  );
   gl.enableVertexAttribArray(programInfo.attribLocations.a_Color);
 }

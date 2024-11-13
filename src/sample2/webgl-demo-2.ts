@@ -45,9 +45,7 @@ void main() {
   // 设置fragment shader, 全白色
   const fsSource = `
 
-  precision mediump float;
-  varying vec4 v_Color;      // 从顶点着色器接收颜色
-
+    varying lowp vec4 v_Color; // varying用于在顶点着色器和片段着色器之间传递数据
     void main() {
     // gl_FragColor = vec4(0.0, 0.0, 1.0, 0.5); // 半透明蓝色
     gl_FragColor = v_Color; // 使用varying变量

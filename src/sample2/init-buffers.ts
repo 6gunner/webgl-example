@@ -62,13 +62,12 @@ function initColorBuffer(gl: WebGLRenderingContext) {
   }
   gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
   // 为每个顶点添加 RGB 颜色
-  const colors = [
-    // R,   G,   B,   A
-    1.0, 0.0, 0.0, 1.0,    // 红色
-    0.0, 1.0, 0.0, 1.0,    // 绿色
+  const pastelColors = [
+    1.0, 0.8, 0.8, 1.0,    // 淡红色
+    0.8, 1.0, 0.8, 1.0,    // 淡绿色
+    0.8, 0.8, 1.0, 1.0,    // 淡蓝色
     1.0, 1.0, 0.8, 1.0,    // 淡黄色
-    1, 1, 1.0, 1.0,    // 黑色
   ];
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(pastelColors), gl.STATIC_DRAW);
   return colorBuffer;
 }

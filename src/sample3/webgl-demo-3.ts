@@ -48,7 +48,6 @@ void main() {
   const fsSource = `
     varying lowp vec4 v_Color; // varying用于在顶点着色器和片段着色器之间传递数据
     void main() {
-      // gl_FragColor = vec4(0.0, 0.0, 1.0, 0.5); // 半透明蓝色
       gl_FragColor = v_Color; // 使用varying变量
     }
   `;
@@ -78,7 +77,7 @@ void main() {
 
   // drawScreen(gl, programInfo, buffers, squareRotation);
 
-  let squareRotation = 0; // 角度
+  let cubeRotation = 0; // 角度
   let deltaTime = 0;
   let then = 0;
   /**
@@ -90,8 +89,8 @@ void main() {
     deltaTime = now - then; // 计算时间差
     then = now;
 
-    drawScreen(gl, programInfo, buffers, squareRotation);
-    squareRotation = squareRotation + 0.5 * deltaTime; // 每秒旋转0.5度
+    drawScreen(gl, programInfo, buffers, cubeRotation);
+    cubeRotation = cubeRotation + deltaTime; // 每秒旋转0.5度
     requestAnimationFrame(render);
   }
 

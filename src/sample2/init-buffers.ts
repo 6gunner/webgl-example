@@ -1,14 +1,17 @@
 export type MyBuffers = {
   position: WebGLBuffer | null;
   color: WebGLBuffer | null;
+  index: WebGLBuffer | null;
 }
 
 export function initBuffers(gl: WebGLRenderingContext): MyBuffers {
   const positionBuffer = initPositionBuffer(gl);
   const colorBuffer = initColorBuffer(gl);
+  const indexBuffer = initIndexBuffer(gl);
   return {
     position: positionBuffer,
-    color: colorBuffer
+    color: colorBuffer,
+    index: indexBuffer
   }
 
 }
@@ -70,4 +73,20 @@ function initColorBuffer(gl: WebGLRenderingContext) {
   ];
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(pastelColors), gl.STATIC_DRAW);
   return colorBuffer;
+}
+
+// 每一个面有2个三角形，每个三角形有3个顶点，这里指定他们的索引
+function initIndexBuffer(gl: WebGLRenderingContext) {
+  const indexBuffer = gl.createBuffer();
+  if (indexBuffer === null) {
+    alert("Unable to create index buffer");
+    return null;
+  }
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+  const indices = [
+    0, 1, 2, // 第一个三角形
+    1, 2, 3, // 第二个三角形
+  ]
+  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
+  return indexBuffer;
 }

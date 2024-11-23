@@ -30,14 +30,14 @@ function initPositionBuffer(gl: WebGLRenderingContext) {
   // 2个三角形，6个面，每一个面4个点  
   const positions = [
     // 前面 (z = 1.0)
-    -1.0, -1.0, 1.0,  // 左下
-    1.0, -1.0, 1.0,  // 右下
+    -1.0, 1.0, 1.0,  // 左下
+    0.0, -1.0, 1.0,  // 右下
     1.0, 1.0, 1.0,  // 右上
 
     // 后面 (z = -1.0)
-    -1.0, -1.0, -1.0,  // 左下
-    1.0, -1.0, -1.0,  // 右下
-    1.0, 1.0, -1.0,  // 右上
+    -1.0, -1.0, 1.0,  // 左下
+    1.0, -1.0, 1.0,  // 右下
+    0.0, 2.0, 1.0,  // 右上
   ];
 
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
@@ -52,22 +52,18 @@ function initColorBuffer(gl: WebGLRenderingContext) {
   }
   gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
   // 为每个顶点添加 RGB 颜色
-  const faceColors = [
-    // red
-    [1.0, 0.0, 0.0, 1.0], // Back face: red
-    [1.0, 0.0, 0.0, 1.0], // Back face: red
-    [1.0, 0.0, 0.0, 1.0], // Back face: red
+  const colors = [
+    // 第一个三角形 - 红色
+    1.0, 0.0, 0.0, 1.0,    // 红
+    1.0, 0.0, 0.0, 1.0,    // 红
+    1.0, 0.0, 0.0, 1.0,    // 红
 
-    // green
-    [0.0, 1.0, 0.0, 1.0], // Top face: green
-    [0.0, 1.0, 0.0, 1.0], // Top face: green
-    [0.0, 1.0, 0.0, 1.0], // Top face: green
+    // 第二个三角形 - 绿色
+    0.0, 1.0, 0.0, 1.0,    // 绿
+    0.0, 1.0, 0.0, 1.0,    // 绿
+    0.0, 1.0, 0.0, 1.0,    // 绿
   ];
-  let colors: number[] = [];
-  for (let i = 0; i < faceColors.length; i++) {
-    const c = faceColors[i];
-    colors = colors.concat(c, c, c, c);
-  }
+
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
   return colorBuffer;
 }

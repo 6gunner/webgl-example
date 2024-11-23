@@ -10,10 +10,9 @@ export type ProgramInfo = {
     a_Color: number;
   };
   uniformLocations: {
-
     u_ProjectionMatrix: WebGLUniformLocation | null;
-    u_ModelMatrix: WebGLUniformLocation | null;
     u_ViewMatrix: WebGLUniformLocation | null;
+    u_ModelMatrix: WebGLUniformLocation | null;
   };
 }
 
@@ -28,14 +27,9 @@ function main() {
     );
     return;
   }
-  // Set clear color to white, fully opaque
-  gl.clearColor(0, 0, 0, 1.0);
-  // Clear the color buffer with specified clear color
-  gl.clear(gl.COLOR_BUFFER_BIT);
-
   // 将顶点坐标 x 世界坐标转化矩阵 x 投影矩阵
   const vsSource = `
-attribute vec4 a_Position;
+attribute vec3 a_Position;
 attribute vec4 a_Color;
 uniform mat4 u_ModelMatrix; // 模型矩阵
 uniform mat4 u_ViewMatrix; // 视图矩阵
@@ -44,13 +38,14 @@ uniform mat4 u_ProjectionMatrix; // 投影矩阵
 varying vec4 v_Color; // 用来传递颜色的varying变量
 
 void main() {
-  gl_Position = u_ProjectionMatrix * u_ViewMatrix * u_ModelMatrix * vec4(a_Position, 1);
+  gl_Position = u_ProjectionMatrix * u_ViewMatrix * u_ModelMatrix * vec4(a_Position, 1.0);
   v_Color = a_Color;
 }
   `;
 
   // 设置fragment shader
   const fsSource = `
+    precision mediump float;
     varying vec4 v_Color; // 用来传递颜色的varying变量
     void main() {
       gl_FragColor = v_Color; // 设置颜色
@@ -94,7 +89,7 @@ void main() {
     deltaTime = now - then; // 计算时间差
     then = now;
     drawScreen(gl, programInfo, buffers, cubeRotation);
-    cubeRotation = cubeRotation + 0.1 * deltaTime; // 每秒旋转0.5度
+    cubeRotation = cubeRotation + 1 * deltaTime; // 每秒旋转0.5度
     requestAnimationFrame(render);
   }
 
@@ -113,7 +108,16 @@ void main() {
  */
 function initShader(gl: WebGLRenderingContext, vsSource: string, fsSource: string) {
   const vertexShader = loadShader(gl, vsSource, gl.VERTEX_SHADER);
+  if (!vertexShader) {
+    console.error("Failed to create vertex shader");
+    return null;
+  }
+
   const fragmentShader = loadShader(gl, fsSource, gl.FRAGMENT_SHADER);
+  if (!fragmentShader) {
+    console.error("Failed to create fragment shader");
+    return null;
+  }
 
   // Create the shader program
   const shaderProgram = gl.createProgram();
@@ -121,16 +125,14 @@ function initShader(gl: WebGLRenderingContext, vsSource: string, fsSource: strin
     console.error("Unable to create shader program");
     return null;
   }
-  if (!vertexShader || !fragmentShader) {
-    return null;
-  }
+
   gl.attachShader(shaderProgram, vertexShader);
   gl.attachShader(shaderProgram, fragmentShader);
   gl.linkProgram(shaderProgram);
 
-  debugger
   if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
-    console.error("Unable to initialize the shader program: " + gl.getProgramInfoLog(shaderProgram));
+    const linkErrLog = gl.getProgramInfoLog(shaderProgram);
+    console.error("Shader program linking failed:", linkErrLog);
     return null;
   }
 
@@ -147,16 +149,21 @@ function initShader(gl: WebGLRenderingContext, vsSource: string, fsSource: strin
 function loadShader(gl: WebGLRenderingContext, source: string, type: number) {
   const shader = gl.createShader(type);
   if (shader === null) {
-    console.error("Unable to create loader shader");
+    console.error("Unable to create shader");
     return null;
   }
+
   gl.shaderSource(shader, source);
   gl.compileShader(shader);
+
   if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-    console.error("An error occurred compiling the shaders: " + gl.getShaderInfoLog(shader));
+    const info = gl.getShaderInfoLog(shader);
+    console.error(`Shader compilation failed:`, info);
+    console.error(`Shader source:`, source);
     gl.deleteShader(shader);
     return null;
   }
+
   return shader;
 }
 
